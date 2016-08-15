@@ -1,0 +1,93 @@
+var QuoteApp = React.createClass({
+  getInitialState: function() {
+    return {
+      author: '',
+      quote: ''
+    }
+  },
+  
+  _fillQuote: function(response) {
+    this.setState({
+      author: response.author,
+      quote: response.quote
+    })
+  },
+  
+  _retrieveQuote: function() {
+    $.ajax({
+      url: 'https://andruxnet-random-famous-quotes.p.mashape.com/?cat=famous',
+      dataType: 'json',
+      cache: false,
+      success: function(response) {
+        this._fillQuote(response);
+      }.bind(this),
+      error: function(err) {
+        alert(err);
+      }.bind(this),
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("X-Mashape-Authorization", "YmWL1IUGuimsh2Qayf6ZCLHY61XUp12fQb9jsnfc6SxsBLbFft");
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this._retrieveQuote();
+  },
+  render: function() {
+    return (
+      <div className='container'>
+        <Title />
+        <Quote quote={this.state.quote} author={this.state.author}/>
+        <GetNewQuote getNewQuote={this._retrieveQuote}/>
+        <TweetQuote quote={this.state.quote} author={this.state.author} />
+      </div>
+    );
+  }  
+});
+
+var Title = React.createClass({
+  render: function() {
+    return(
+      <div className='title'>
+        <div>Random Quote Generator</div>
+      </div>
+    )
+  }
+})
+
+var Quote = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <div className='quote-container'>
+          <p>{this.props.quote}</p>
+          <small> - {this.props.author}</small>
+        </div>
+      </div>
+    )
+  }
+});
+
+var GetNewQuote = React.createClass({
+  handleClick: function() {
+    this.props.getNewQuote();
+  },
+  render: function() {
+    return (
+      <div className='buttons'>
+        <button className='btn btn-success btn-block' onClick={this.handleClick}>New Quote</button>
+      </div>
+    )
+  }
+});
+
+var TweetQuote = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <a href={'https://twitter.com/intent/tweet?text=' + this.props.quote + ' - ' + this.props.author} target="_blank" className="btn btn-primary btn-block">Tweet<i className="fa fa-fw fa-twitter"></i></a>
+      </div>
+    )
+  }
+});
+
+ReactDOM.render(<QuoteApp />, document.getElementById('app-container'));
